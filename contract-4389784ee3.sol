@@ -277,4 +277,9 @@ contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownab
             mint(to, tokenId, uri);
         }    
     }
+
+    function withdraw(address to) public onlyOwner {
+        payable(to).transfer(address(this).balance);
+    }
 }
+
