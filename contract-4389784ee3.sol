@@ -7,14 +7,15 @@ import {ERC721Burnable} from "@openzeppelin/contracts@5.2.0/token/ERC721/extensi
 import {ERC721URIStorage} from "@openzeppelin/contracts@5.2.0/token/ERC721/extensions/ERC721URIStorage.sol";
 import {Ownable} from "@openzeppelin/contracts@5.2.0/access/Ownable.sol";
 import {ERC721Pausable} from "@openzeppelin/contracts@5.2.0/token/ERC721/extensions/ERC721Pausable.sol";
-import "@openzeppelin/contracts@4.7.3/utils/cryptography/draft-EIP712.sol";
-import "@openzeppelin/contracts@4.5.0/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownable, EIP712 {
 
     
     string private SIGNING_DOMAIN = "ARMY_VOUCHER";
-    string private SIGN_VERSION = "1.0";
+    string private SIGN_VERSION = "1";
     
     uint256 public totalMinted;
     uint256 public max_supply;
@@ -25,8 +26,8 @@ contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownab
     uint256 public spAllowListEndTime;
     uint256 public maximumSpMint;
 
-    bytes32 private fpAllowListRoot;
-    bytes32 private spAllowListRoot;
+    bytes32 public fpAllowListRoot;
+    bytes32 public spAllowListRoot;
 
     bool public publicMintLive;
     bool public fpAllowListMintLive;
@@ -93,7 +94,7 @@ contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownab
 
    function redeemPublicMintVoucher(PublicMintVoucher calldata voucher) public view  returns (address) {
        bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
-        keccak256("PublicMintVoucher(address minter, uint256 tokenId, string uri)"),
+        keccak256("PublicMintVoucher(address minter,uint256 tokenId,string uri)"),
         voucher.minter,
         voucher.tokenId,
         keccak256(bytes(voucher.uri))
@@ -210,7 +211,7 @@ contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownab
     {
     require(spMinterTotal[minter] < maximumSpMint, "maximum nft mint reached.");
        mint(minter, tokenId, uri);
-       spMinterTotal[minter] = spMinterTotal[minter]++;
+       spMinterTotal[minter] = spMinterTotal[minter] + 1;
    }
 
    function setSpAllowListPrice(uint256 price) public onlyOwner {
@@ -228,7 +229,7 @@ contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownab
         checkTotalMinted
         checkMintStatus(tokenId)
     {
-        totalMinted = totalMinted++;
+        totalMinted = totalMinted + 1;
          mintStatus[tokenId] = true;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
