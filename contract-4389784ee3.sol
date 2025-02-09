@@ -34,7 +34,7 @@ contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownab
     bool public spAllowListMintLive;
 
     constructor(address initialOwner) EIP712(SIGNING_DOMAIN, SIGN_VERSION)
-        ERC721("Army", "onchainarmy")
+        ERC721("Onchain Army", "Army")
         Ownable(initialOwner)
     {
         totalMinted = 0;
@@ -280,7 +280,8 @@ contract Army is ERC721, ERC721URIStorage, ERC721Pausable, ERC721Burnable, Ownab
     }
 
     function withdraw(address to) public onlyOwner {
-        payable(to).transfer(address(this).balance);
+        (bool success, ) = to.call{value: address(this).balance}("");
+        require(success, "Transfer failed");
     }
 }
 
